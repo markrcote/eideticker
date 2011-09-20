@@ -206,25 +206,22 @@ class CaptureControllerRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             imgs_path = os.path.join(CAPTURE_DIR, capture_name + '-pngs.zip')
             if os.path.exists(imgs_path):
                 imgs_url = '/captures/%s' % os.path.basename(imgs_path)
-            return { capture_name: { 'imgs': imgs_url,
-                                     'raw': raw_url,
-                                     'avi': avi_url } }
+            return { 'imgs': imgs_url,
+                     'raw': raw_url,
+                     'avi': avi_url }
 
     def captures(self):
         if self.path[-1] == '/':
             capture_data = {}
             if self.path == '/captures/':
-                captures = set()
                 r = '\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{6}'
                 for f in os.listdir(CAPTURE_DIR):
                     m = re.match(r, f)
                     if m:
-                        captures.add(m.group(0))
+                        capture_data[m.group(0)] = self.capture_data(m.group(0))
             else:
                 comps = filter(lambda x: x, self.path.split('/'))
-                captures = set(comps[1])
-            for capture_name in captures:
-                capture_data.update(self.capture_data(capture_name))
+                capture_data = self.capture_data(comps[1])
             return (200, capture_data)
         filename = os.path.basename(self.path)
         filepath = os.path.join(CAPTURE_DIR, filename)
