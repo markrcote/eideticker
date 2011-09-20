@@ -30,7 +30,7 @@ CFLAGS=-Wno-multichar -I $(SDK_PATH) -fno-rtti
 LDFLAGS=-lm -ldl -lpthread
 
 Capture: Capture.cpp $(SDK_PATH)/DeckLinkAPIDispatch.cpp
-	$(CC) -o Capture Capture.cpp $(SDK_PATH)/DeckLinkAPIDispatch.cpp $(CFLAGS) $(LDFLAGS)
+	$(CC) -lrt -o Capture Capture.cpp $(SDK_PATH)/DeckLinkAPIDispatch.cpp $(CFLAGS) $(LDFLAGS)
 
 clean:
 	rm -f Capture

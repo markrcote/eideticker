@@ -36,6 +36,7 @@
 #include <pthread.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <sys/time.h>
 
 #include "DeckLinkAPI.h"
 #include "Capture.h"
@@ -48,12 +49,12 @@ IDeckLink* deckLink;
 IDeckLinkInput* deckLinkInput;
 IDeckLinkDisplayModeIterator* displayModeIterator;
 
-static BMDTimecodeFormat g_timecodeFormat = 0;
 static int g_videoModeIndex = -1;
 const char* g_videoOutputFile = NULL;
 static int g_maxFrames = -1;
 
 static unsigned long frameCount = 0;
+timespec g_lastFrameTime;
 
 DeckLinkCaptureDelegate::DeckLinkCaptureDelegate() : m_refCount(0)
 {
@@ -92,38 +93,34 @@ ULONG DeckLinkCaptureDelegate::Release(void)
 HRESULT DeckLinkCaptureDelegate::VideoInputFrameArrived(IDeckLinkVideoInputFrame* videoFrame, IDeckLinkAudioInputPacket* audioFrame)
 {
     void* frameBytes;
+    timespec prevFrameTime = g_lastFrameTime;
+    clock_gettime(CLOCK_MONOTONIC, &g_lastFrameTime);
+    unsigned int elapsedmSec =  (g_lastFrameTime.tv_sec * 1000 +
+                                 g_lastFrameTime.tv_nsec / 1000000) -
+                                (prevFrameTime.tv_sec * 1000 +
+                                 prevFrameTime.tv_nsec / 1000000);
 	
     // Handle Video Frame
     if (videoFrame)
     {	
         if (videoFrame->GetFlags() & bmdFrameHasNoInputSource)
         {
-            fprintf(stderr, "Frame received (#%lu) - No input signal detected\n", frameCount);
+            fprintf(stderr, "Frame received (#%lu) - No input signal "
+                    "detected\n", frameCount);
         }
         else
         {
-            const char *timecodeString = NULL;
-            if (g_timecodeFormat != 0)
-            {
-                IDeckLinkTimecode *timecode;
-                if (videoFrame->GetTimecode(g_timecodeFormat, &timecode) == S_OK)
-                {
-                    timecode->GetString(&timecodeString);
-                }
-            }
-
-            fprintf(stderr, "Frame received (#%lu) [%s] - Valid Frame - Size: %li bytes\n", 
+            fprintf(stderr, "Frame received (#%lu) [%d ms] - Valid Frame - "
+                    "Size: %li bytes\n", 
                     frameCount,
-                    timecodeString != NULL ? timecodeString : "No timecode",
+                    elapsedmSec,
                     videoFrame->GetRowBytes() * videoFrame->GetHeight());
-
-            if (timecodeString)
-                free((void*)timecodeString);
 			
             if (videoOutputFile != -1)
             {
                 videoFrame->GetBytes(&frameBytes);
-                write(videoOutputFile, frameBytes, videoFrame->GetRowBytes() * videoFrame->GetHeight());
+                write(videoOutputFile, frameBytes,
+                      videoFrame->GetRowBytes() * videoFrame->GetHeight());
             }
 		
             frameCount++;
@@ -181,10 +178,6 @@ int usage(int status)
             "         1:  10 bit YUV (4:2:2)\n"
             "         2:  8 bit ARGB (4:4:4)\n"
             "         3:  10 bit RGB (4:4:4)\n"
-            "    -t <format>          Print timecode\n"
-            "     rp188:  RP 188\n"
-            "      vitc:  VITC\n"
-            "    serial:  Serial Timecode\n"
             "    -f <filename>        Filename raw video will be written to\n"
             "    -n <frames>          Number of frames to capture (default is unlimited)\n"
             "\n"
@@ -242,7 +235,7 @@ int main(int argc, char *argv[])
     }
 	
     // Parse command line options
-    while ((ch = getopt(argc, argv, "?h3f:m:n:p:t:")) != -1) 
+    while ((ch = getopt(argc, argv, "?h3f:m:n:p:")) != -1) 
     {
         switch (ch) 
         {
@@ -256,7 +249,7 @@ int main(int argc, char *argv[])
             g_maxFrames = atoi(optarg);
             break;
         case 'p':
-            switch(atoi(optarg))
+            switch (atoi(optarg))
             {
             case 0: pixelFormat = bmdFormat8BitYUV; break;
             case 1: pixelFormat = bmdFormat10BitYUV; break;
@@ -264,19 +257,6 @@ int main(int argc, char *argv[])
             case 3: pixelFormat = bmdFormat10BitRGB; break;
             default:
                 fprintf(stderr, "Invalid argument: Pixel format %d is not valid", atoi(optarg));
-                goto bail;
-            }
-            break;
-        case 't':
-            if (!strcmp(optarg, "rp188"))
-                g_timecodeFormat = bmdTimecodeRP188;
-            else if (!strcmp(optarg, "vitc"))
-                g_timecodeFormat = bmdTimecodeVITC;
-            else if (!strcmp(optarg, "serial"))
-                g_timecodeFormat = bmdTimecodeSerial;
-            else
-            {
-                fprintf(stderr, "Invalid argument: Timecode format \"%s\" is invalid\n", optarg);
                 goto bail;
             }
             break;
@@ -339,6 +319,7 @@ int main(int argc, char *argv[])
         goto bail;
     }
 
+    clock_gettime(CLOCK_MONOTONIC, &g_lastFrameTime);
     result = deckLinkInput->StartStreams();
     if(result != S_OK)
     {
@@ -355,7 +336,7 @@ int main(int argc, char *argv[])
     fprintf(stderr, "Stopping Capture\n");
 
 bail:
-   	
+    
     if (videoOutputFile)
         close(videoOutputFile);
 	
