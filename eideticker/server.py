@@ -40,7 +40,7 @@
 
 import BaseHTTPServer
 import json
-from controller import CaptureSubprocessController
+from controller import CaptureController
 import os
 import re
 import datetime
@@ -52,7 +52,7 @@ class CaptureControllerHTTPServer(BaseHTTPServer.HTTPServer):
     def __init__(self, server_address, request_handler_class):
         BaseHTTPServer.HTTPServer.__init__(self, server_address,
                                            request_handler_class)
-        self.pcontroller = CaptureSubprocessController()
+        self.pcontroller = CaptureController()
 
     def get_filename(self):
         return os.path.join(CAPTURE_DIR, datetime.datetime.now().isoformat())
@@ -170,15 +170,12 @@ class CaptureControllerRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             return (404, {})
 
 
-def main(port):
-    server = CaptureControllerHTTPServer(('', port),
-                                         CaptureControllerRequestHandler)
-    server.serve_forever()
-
-
-if __name__ == '__main__':
+def main():
     import sys
     port = 8888
     if len(sys.argv) > 1:
         port = int(sys.argv[1])
-    main(port)
+
+    server = CaptureControllerHTTPServer(('', port),
+                                         CaptureControllerRequestHandler)
+    server.serve_forever()

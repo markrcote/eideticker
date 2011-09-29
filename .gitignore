@@ -1,3 +1,5 @@
 *~
 *.pyc
-capture/decklink/Capture
+eideticker/decklink/decklink-capture
+build/*
+eideticker.egg-info/

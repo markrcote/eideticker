@@ -29,8 +29,8 @@ SDK_PATH=sdk
 CFLAGS=-Wno-multichar -I $(SDK_PATH) -fno-rtti
 LDFLAGS=-lm -ldl -lpthread
 
-Capture: Capture.cpp $(SDK_PATH)/DeckLinkAPIDispatch.cpp
-	$(CC) -lrt -o Capture Capture.cpp $(SDK_PATH)/DeckLinkAPIDispatch.cpp $(CFLAGS) $(LDFLAGS)
+decklink-capture: Capture.cpp $(SDK_PATH)/DeckLinkAPIDispatch.cpp
+	$(CC) -lrt -o decklink-capture Capture.cpp $(SDK_PATH)/DeckLinkAPIDispatch.cpp $(CFLAGS) $(LDFLAGS)
 
 clean:
-	rm -f Capture
+	rm -f decklink-capture

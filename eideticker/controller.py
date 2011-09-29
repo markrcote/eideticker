@@ -41,7 +41,7 @@
 import subprocess
 import time
 
-class CaptureSubprocessController(object):
+class CaptureController(object):
 
     def __init__(self):
         self.capture_proc = None
@@ -56,7 +56,7 @@ class CaptureSubprocessController(object):
             return
         print 'launching'
         self.output_filename = output_filename
-        args = ('decklink/Capture',
+        args = ('decklink-capture',
                 '-m',
                 '13',
                 '-p',
@@ -104,5 +104,5 @@ class CaptureSubprocessController(object):
         # convert raw file
         # if this is too slow, we'll have to make this asynchronous and
         # have multiple states
-        args = ('decklink/convert.sh', self.output_filename)
+        args = ('decklink-convert.sh', self.output_filename)
         subprocess.Popen(args, close_fds=True).wait()
