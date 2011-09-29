@@ -19,8 +19,8 @@ Capture
 
 ### Installation
 
-Simply run `make` in the `capture/decklink/` directory to compile the C++
-capture app.
+Run `make` in the `capture/decklink/` directory to compile the C++ capture
+app.
 
 
 ### Usage
