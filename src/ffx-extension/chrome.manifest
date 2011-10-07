@@ -1,0 +1,4 @@
+content eideticker-controller chrome/eideticker-controller/content/
+component {67a4936d-ce4c-4090-86f5-8a52ea173c5f} chromescript.js
+contract @mozilla.org/eideticker-controller-observer;1 {67a4936d-ce4c-4090-86f5-8a52ea173c5f}
+category profile-after-change @mozilla.org/eideticker-controller-observer;1 @mozilla.org/eideticker-controller-observer;1

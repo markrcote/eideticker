@@ -51,6 +51,8 @@ virtualenv .
 
 # Install videocapture and jsbridge python eggs (and their deps)
 ./bin/easy_install src/videocapture
+./bin/easy_install src/mozmill/mozrunner
+./bin/easy_install src/mozmill/jsbridge
 
 # Install extensions required by mobile talos
 TALOS_EXTENSION_DIR=src/talos/mobile_profile/extensions

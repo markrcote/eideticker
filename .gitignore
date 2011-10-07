@@ -7,6 +7,10 @@ bin/decklink-convert.sh
 bin/easy_install
 bin/easy_install-2.7
 bin/eideticker-server
+bin/manifestparser
+bin/mozinfo
+bin/mozprofile
+bin/mozrunner
 bin/pip
 bin/python
 downloads/mobile_tp4.zip

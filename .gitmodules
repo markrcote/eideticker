@@ -1,3 +1,6 @@
 [submodule "src/talos"]
 	path = src/talos
 	url = git://github.com/wlach/talos.git
+[submodule "src/mozmill"]
+	path = src/mozmill
+	url = git://github.com/ctalbert/mozmill.git
