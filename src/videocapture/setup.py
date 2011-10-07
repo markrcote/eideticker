@@ -1,10 +1,10 @@
 from setuptools import setup, find_packages
 setup(
-    name = "eideticker",
+    name = "videocapture",
     version = "0.1.0",
     packages = find_packages(),
-    scripts = [ "eideticker/decklink/decklink-capture",
-                "eideticker/decklink/decklink-convert.sh" ],
+    scripts = [ "videocapture/decklink/decklink-capture",
+                "videocapture/decklink/decklink-convert.sh" ],
     entry_points = {
       "console_scripts": ["eideticker-server = eideticker.server:main"]
     }

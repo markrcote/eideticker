@@ -2,10 +2,8 @@ Project Eideticker
 ==================
 
 Project Eideticker is an automated test harness that captures and analyzes
-browser output.
-
-Capture
--------
+browser output (currently only on Fennec on Android, but support for other
+platforms is planned).
 
 ### Requirements
 
@@ -19,48 +17,30 @@ Capture
 
 ### Installation
 
-Run `make` in the `capture/decklink/` directory to compile the C++ capture
-app.
-
+Run `bootstrap.sh` in the root directory to set everything up.
 
 ### Usage
 
-Run `./controller.py <port>` from within the `capture/` directory.  The default
-port is 8888.
+Eideticker is currently only tested with the Galaxy S-2 phone, running
+Android 2.2 and rooted. Assuming this is your configuration, you should be
+able to get Eideticker running by install SUTAgent on your phone and issuing
+the following commands:
 
-The capture device is controlled through a web interface.  These command paths
-are support:
+    ./bin/setup-talos.sh <ip address of phone> \
+                         <address of a checkout of talos on your web server> \
+                         <name of fennec application to test>
 
-* `/start/`
+For example, my workstation is on 192.168.1.2, I've bindmounted talos's
+directory to a subdirectory on my workstation, I've built a custom version
+of fennec with the name org.mozilla.fennec_wlach, and my phone has an ip
+address of 192.168.1.4. I'd thus run setup-talos.sh as follows:
 
-  Start recording.
+    ./bin/setup-talos.sh 192.168.1.4 192.168.1.2/talos org.mozilla.fennec_wlach
 
-* `/stop/`
+Once you've configured talos, you can run it with a single command:
 
-  Stop recording and run the conversion script on the raw output.
+    ./bin/run-talos.sh
 
-* `/status/`
-
-  Indicates if a job is running, and, if so, the name of the capture.
-
-* `/captures/`
-
-  Returns a JSON dictionary of the currently stored captures along with URLs
-  to the individual data files (raw video, avi, png archive).
-
-* `/captures/<timestamp>/`
-
-  Returns a JSON dictionary of the URLs to the individual data files for the
-  given capture.
-
-* `/captures/<timestamp>/<filename>`
-
-  Access the raw video, avi, or png archive of the given capture.
-
-
-### To Do
-
-* More configuration options (command line and/or config file).
-* Packaging.
-* Logging.
-* Verify if the Capture program has been compiled.
+You should then have a bunch of capture data stored in `src/talos/captures`.
+Currently we just run the ts test (not very interesting), more useful tests
+planned!
